@@ -1,0 +1,17 @@
+[
+  {
+    "system": "ERP",
+    "type": "DB",
+    "ip": "10.0.0.1"
+  },
+  {
+    "system": "CRM",
+    "type": "App",
+    "ip": "10.0.1.1"
+  },
+  {
+    "system": "Mail",
+    "type": "Mail",
+    "ip": "10.0.2.1"
+  }
+]
