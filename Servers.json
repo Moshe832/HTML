@@ -1,17 +1,17 @@
 [
   {
-    "system": "ERP",
-    "type": "DB",
-    "ip": "10.0.0.1"
+    "system": "מערכת א",
+    "type": "שרת אפליקציה",
+    "servers": ["srv-app-01", "srv-app-02", "srv-app-03"]
   },
   {
-    "system": "CRM",
-    "type": "App",
-    "ip": "10.0.1.1"
+    "system": "מערכת ב",
+    "type": "שרת DB",
+    "servers": ["srv-db-01"]
   },
   {
-    "system": "Mail",
-    "type": "Mail",
-    "ip": "10.0.2.1"
+    "system": "מערכת ג",
+    "type": "שרת קבצים",
+    "servers": ["srv-files-01", "srv-files-02"]
   }
 ]
