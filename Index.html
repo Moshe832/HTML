@@ -19,29 +19,38 @@
   </tr>
 </table>
 
-<script>
 async function loadServers() {
   try {
     const response = await fetch('servers.json?_=' + new Date().getTime());
     const data = await response.json();
     const table = document.getElementById('serversTable');
 
-    // מנקה את הטבלה פרט לכותרת
+    // מחיקת שורות ישנות
     table.innerHTML = `
       <tr>
         <th>מערכת</th>
         <th>סוג השרת</th>
-        <th>כתובת IP</th>
+        <th>שרתים</th>
       </tr>
     `;
 
-    // מוסיף כל שרת
-    data.forEach(server => {
+    if (data.length === 0) {
       const row = table.insertRow();
-      row.insertCell(0).innerText = server.system;
-      row.insertCell(1).innerText = server.type;
-      row.insertCell(2).innerText = server.ip;
-    });
+      const cell = row.insertCell(0);
+      cell.colSpan = 3;
+      cell.innerText = "אין שרתים להצגה";
+      cell.style.textAlign = "center";
+    } else {
+      data.forEach(server => {
+        const row = table.insertRow();
+        row.insertCell(0).innerText = server.system;
+        row.insertCell(1).innerText = server.type;
+
+        // הצגת כל השרתים בשורה חדשה בתוך התא
+        const serversCell = row.insertCell(2);
+        serversCell.innerHTML = server.servers.map(s => s).join('<br>'); 
+      });
+    }
 
   } catch (err) {
     console.error('Error loading JSON:', err);
@@ -53,6 +62,6 @@ loadServers();
 
 // עדכון אוטומטי כל 5 שניות
 setInterval(loadServers, 5000);
-</script>
+
 </body>
 </html>
