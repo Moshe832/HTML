@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<title>רשימת מערכות ושרתים</title>
+<style>
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+  th { background-color: #f2f2f2; }
+</style>
+</head>
+<body>
+<h1>רשימת מערכות ושרתים</h1>
+<table id="serversTable">
+  <tr>
+    <th>מערכת</th>
+    <th>סוג השרת</th>
+    <th>כתובת IP</th>
+  </tr>
+</table>
+
+<script>
+async function loadServers() {
+  try {
+    const response = await fetch('servers.json?_=' + new Date().getTime());
+    const data = await response.json();
+    const table = document.getElementById('serversTable');
+
+    // מנקה את הטבלה פרט לכותרת
+    table.innerHTML = `
+      <tr>
+        <th>מערכת</th>
+        <th>סוג השרת</th>
+        <th>כתובת IP</th>
+      </tr>
+    `;
+
+    // מוסיף כל שרת
+    data.forEach(server => {
+      const row = table.insertRow();
+      row.insertCell(0).innerText = server.system;
+      row.insertCell(1).innerText = server.type;
+      row.insertCell(2).innerText = server.ip;
+    });
+
+  } catch (err) {
+    console.error('Error loading JSON:', err);
+  }
+}
+
+// טוען בפעם ראשונה
+loadServers();
+
+// עדכון אוטומטי כל 5 שניות
+setInterval(loadServers, 5000);
+</script>
+</body>
+</html>
