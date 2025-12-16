@@ -16,9 +16,11 @@
     <th>מערכת</th>
     <th>סוג השרת</th>
     <th>כתובת IP</th>
+    <th>דומיין</th> <!-- New Domain Header -->
   </tr>
 </table>
 
+<script>
 async function loadServers() {
   try {
     const response = await fetch('servers.json?_=' + new Date().getTime());
@@ -30,14 +32,15 @@ async function loadServers() {
       <tr>
         <th>מערכת</th>
         <th>סוג השרת</th>
-        <th>שרתים</th>
+        <th>כתובת IP</th>
+        <th>דומיין</th>
       </tr>
     `;
 
     if (data.length === 0) {
       const row = table.insertRow();
       const cell = row.insertCell(0);
-      cell.colSpan = 3;
+      cell.colSpan = 4; // Updated colspan to match new column count
       cell.innerText = "אין שרתים להצגה";
       cell.style.textAlign = "center";
     } else {
@@ -45,10 +48,8 @@ async function loadServers() {
         const row = table.insertRow();
         row.insertCell(0).innerText = server.system;
         row.insertCell(1).innerText = server.type;
-
-        // הצגת כל השרתים בשורה חדשה בתוך התא
-        const serversCell = row.insertCell(2);
-        serversCell.innerHTML = server.servers.map(s => s).join('<br>'); 
+        row.insertCell(2).innerText = server.ip;
+        row.insertCell(3).innerText = server.domain; // New Domain Cell
       });
     }
 
@@ -62,6 +63,7 @@ loadServers();
 
 // עדכון אוטומטי כל 5 שניות
 setInterval(loadServers, 5000);
+</script>
 
 </body>
 </html>
