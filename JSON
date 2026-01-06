@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pretty JSON Viewer</title>
+<style>
+  body { font-family: monospace; background: #f4f4f4; padding: 20px; }
+  pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow: auto; }
+</style>
+</head>
+<body>
+
+<h2>Pretty JSON Viewer</h2>
+
+<textarea id="jsonInput" rows="10" cols="80" placeholder="Paste your JSON here"></textarea>
+<br><br>
+<button onclick="prettyPrintJSON()">Format JSON</button>
+
+<h3>Output:</h3>
+<pre id="output"></pre>
+
+<script>
+function prettyPrintJSON() {
+    const input = document.getElementById('jsonInput').value;
+    try {
+        const obj = JSON.parse(input);
+        const pretty = JSON.stringify(obj, null, 2);
+        document.getElementById('output').textContent = pretty;
+    } catch (e) {
+        document.getElementById('output').textContent = "Invalid JSON!";
+    }
+}
+</script>
+
+</body>
+</html>
