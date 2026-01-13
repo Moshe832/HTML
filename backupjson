@@ -1,0 +1,47 @@
+pipeline {
+    agent { label 'windows' }
+
+    parameters {
+        string(name: 'SYSTEM_NAME')
+        string(name: 'SYSTEM_TYPE')
+        string(name: 'SERVERS')
+    }
+
+    stages {
+        stage('Add system') {
+            steps {
+                powershell '''
+                $jsonPath = "C:\\inetpub\\wwwroot\\data.json"
+
+                # צור קובץ ריק אם לא קיים
+                if (-not (Test-Path $jsonPath)) { @() | ConvertTo-Json | Out-File $jsonPath }
+
+                # קובץ גיבוי עם תאריך ושעה
+                $backupPath = "$jsonPath.$((Get-Date).ToString('yyyyMMdd_HHmmss')).bak"
+                Copy-Item $jsonPath $backupPath -Force
+
+                $json = Get-Content $jsonPath -Raw | ConvertFrom-Json
+
+                # ודא שהשרתים תמיד במערך
+                $serversArray = @($env:SERVERS -split ',' | ForEach-Object { $_.Trim() })
+
+                $newSystem = @{
+                    system  = $env:SYSTEM_NAME
+                    type    = $env:SYSTEM_TYPE
+                    servers = $serversArray
+                }
+
+                # הוסף רק אם המערכת לא קיימת
+                if (-not ($json | Where-Object { $_.system -eq $newSystem.system })) {
+                    $json += $newSystem
+                }
+
+                # שמירה של הקובץ החדש
+                $temp = "$jsonPath.tmp"
+                $json | ConvertTo-Json -Depth 5 | Out-File $temp -Encoding UTF8 -Force
+                Move-Item $temp $jsonPath -Force
+                '''
+            }
+        }
+    }
+}
