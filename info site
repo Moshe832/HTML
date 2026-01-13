@@ -1,0 +1,37 @@
+pipeline {
+    agent { label 'windows' }
+
+    parameters {
+        string(name: 'SYSTEM_NAME')
+        string(name: 'SYSTEM_TYPE')
+        string(name: 'SERVERS')
+    }
+
+    stages {
+        stage('Add system') {
+            steps {
+                powershell '''
+                $jsonPath = "C:\\inetpub\\wwwroot\\data.json"
+
+                $json = Get-Content $jsonPath -Raw | ConvertFrom-Json
+
+                $serversArray = $env:SERVERS -split ',' | ForEach-Object { $_.Trim() }
+
+                $newSystem = @{
+                    system  = $env:SYSTEM_NAME
+                    type    = $env:SYSTEM_TYPE
+                    servers = $serversArray
+                }
+
+                if ($json.system -notcontains $newSystem.system) {
+                    $json += $newSystem
+                }
+
+                $temp = "$jsonPath.tmp"
+                $json | ConvertTo-Json -Depth 5 | Out-File $temp -Encoding UTF8 -Force
+                Move-Item $temp $jsonPath -Force
+                '''
+            }
+        }
+    }
+}
