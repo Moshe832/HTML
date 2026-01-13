@@ -1,0 +1,65 @@
+pipeline {
+    agent { label 'windows' }
+
+    parameters {
+        string(name: 'SYSTEM_NAME')
+        string(name: 'SYSTEM_TYPE')
+        string(name: 'SERVERS')
+    }
+
+    stages {
+        stage('Add system to DB') {
+            steps {
+                powershell '''
+                $connectionString = "Server=SQLSERVER01;Database=MyDB;Integrated Security=True"
+
+                $conn = New-Object System.Data.SqlClient.SqlConnection
+                $conn.ConnectionString = $connectionString
+                $conn.Open()
+
+                # בדיקה אם המערכת קיימת
+                $checkCmd = $conn.CreateCommand()
+                $checkCmd.CommandText = "
+                    SELECT Id FROM Systems WHERE SystemName = @name
+                "
+                $checkCmd.Parameters.AddWithValue("@name", $env:SYSTEM_NAME) | Out-Null
+
+                $systemId = $checkCmd.ExecuteScalar()
+
+                # אם לא קיימת – נכניס
+                if (-not $systemId) {
+                    $insertSystem = $conn.CreateCommand()
+                    $insertSystem.CommandText = "
+                        INSERT INTO Systems (SystemName, SystemType)
+                        OUTPUT INSERTED.Id
+                        VALUES (@name, @type)
+                    "
+                    $insertSystem.Parameters.AddWithValue("@name", $env:SYSTEM_NAME) | Out-Null
+                    $insertSystem.Parameters.AddWithValue("@type", $env:SYSTEM_TYPE) | Out-Null
+
+                    $systemId = $insertSystem.ExecuteScalar()
+                }
+
+                # פיצול שרתים
+                $servers = $env:SERVERS -split ','
+
+                foreach ($srv in $servers) {
+                    $srv = $srv.Trim()
+                    if ($srv) {
+                        $insertServer = $conn.CreateCommand()
+                        $insertServer.CommandText = "
+                            INSERT INTO SystemServers (SystemId, ServerName)
+                            VALUES (@sid, @server)
+                        "
+                        $insertServer.Parameters.AddWithValue("@sid", $systemId) | Out-Null
+                        $insertServer.Parameters.AddWithValue("@server", $srv) | Out-Null
+                        $insertServer.ExecuteNonQuery()
+                    }
+                }
+
+                $conn.Close()
+                '''
+            }
+        }
+    }
+}
